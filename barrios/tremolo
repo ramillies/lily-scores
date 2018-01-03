@@ -1,0 +1,5 @@
+#!/usr/bin/perl
+
+($trem, @notes) = @ARGV;
+
+printf "%s32 %s %s %s ", $_, ($trem)x3 for @notes;

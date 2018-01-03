@@ -1,0 +1,91 @@
+#!/usr/bin/perl
+
+use Tk;
+use Tk::PNG;
+use Data::Dumper;
+use Time::HiRes qw(time);
+use SDLx::Music;
+
+-s $ARGV[0] or die "The given image file does not exist.";
+-s $ARGV[1] or die "The given music file does not exist.";
+-s $ARGV[2] or die "The given description file does not exist.";
+
+$mw = new MainWindow;
+$mw->title("Runner programming: music '$ARGV[1]', image '$ARGV[0]'");
+
+$sc = $mw->Scrolled("Canvas", -cursor => crosshair)->pack(-side => top, -expand => 1, -fill => "both");
+$c = $sc->Subwidget("canvas");
+
+$status = "Loading ... ";
+$statusbar = $mw->Label(-textvariable => \$status)->pack(-side => bottom, -fill => x);
+
+$c->createImage(0, 0, -anchor => "nw", -image => $mw->Photo(-file => $ARGV[0]));
+$c->configure(-scrollregion => [ $c->bbox("all") ]);
+$sc->xviewMoveto(0);
+
+$starttime = undef;
+
+$music = new SDLx::Music;
+$music->data(m => $ARGV[1]);
+$music->data("m")->volume(100);
+$music->load;
+
+open F, $ARGV[2];
+while(<F>) { chomp; push @linepos, $_ }
+($l, $t, $r, $b) = @{$c->cget("scrollregion")};
+@lines = map { $c->createLine($_, $t, $_, $b, -fill => "red") } @linepos;
+@times = ();
+
+$status = "Ready.";
+
+$mw->bind("<space>", sub
+	{
+		$music->play($music->data("m"));
+		$starttime = time;
+		$status = "Playing.";
+	}
+);
+
+sub min { $_[0] > 0 ? $_[0] : 0 }
+$mw->bind("<Button-1>", sub
+	{
+		if($music->playing && @times < @lines)
+		{
+			push @times, (time - $starttime);
+			$c->itemconfigure($lines[$#times], -fill => "green");
+			my($x0, $x1) = $c->xview;
+			$sc->xviewMoveto(min($linepos[@times]/($r-$l) - ($x1 - $x0)/2)) if @times < @lines;
+		}
+	}
+);
+
+$mw->bind("<Button-2>", sub
+	{
+		printf "%.4f\t%d\n", $times[$_], $linepos[$_] for 0..$#times;
+		exit;
+	}
+);
+
+$mw->repeat(50, sub
+	{
+		if(defined $starttime)
+		{
+			my($diff) = time - $starttime;
+			if($music->playing)
+			{
+				$status = sprintf "Playing [%d/%d]: %s%.3f sec", scalar(@times), scalar(@lines), ($diff >= 60 ? int($diff/60). " min " : ""), $diff-60*int($diff/60);
+			}
+			else
+			{
+				$status = "Done playing. Middle-Click to exit.";
+				if($linepos[-1] != $r)
+				{
+					push @linepos, $r;
+					push @times, $diff;
+				}
+			}
+		}
+	}
+);
+
+MainLoop;

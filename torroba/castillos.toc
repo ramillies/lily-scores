@@ -1,0 +1,6 @@
+\select@language {czech}
+\contentsline {subsection}{Poznámky k notaci}{1}
+\contentsline {section}{Alcañiz}{1}
+\contentsline {section}{Alcázar de Segovia}{3}
+\contentsline {section}{Calatrava}{4}
+\contentsline {section}{Javier}{6}

@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+use Tk;
+use Tk::PNG;
+use Data::Dumper;
+
+-s $ARGV[0] or die "The given file does not exist.";
+
+$mw = new MainWindow;
+$mw->title("Define runner points");
+
+$sc = $mw->Scrolled("Canvas", -cursor => crosshair)->pack(-expand => 1, -fill => "both");
+$c = $sc->Subwidget("canvas");
+
+$c->createImage(0, 0, -anchor => "nw", -image => $mw->Photo(-file => $ARGV[0]));
+$c->configure(-scrollregion => [ $c->bbox("all") ]);
+$sc->xviewMoveto(0);
+
+sub wrap { $_[0] > 0 ? ($_[0] < $_[1] ? $_[0] : $_[1])  : 0 }
+$c->Tk::bind("<Button-1>", sub
+	{
+		my($x) = $c->canvasx($_[0]->XEvent->x);
+		my($l, $t, $r, $b) = @{$c->cget("scrollregion")};
+		$c->createLine($x, $t, $x, $b, -fill => "red");
+		my($x0, $x1) = $sc->xview;
+		$sc->xviewMoveto(wrap($x/($r-$l) - ($x1 - $x0)/2, 1-($x1 - $x0)));
+	}
+);
+
+$mw->bind("<Button-2>", sub
+	{
+		my(@all) = $c->find(all);
+		shift @all;
+		print join "\n", sort { $a <=> $b } map { +($c->coords($_))[0] } @all;
+		print "\n";
+		exit;
+	}
+);
+
+$c->Tk::bind("<Button-3>", sub
+	{
+		my $x = $c->canvasx($_[0]->XEvent->x);
+		my(@all) = $c->find(all);
+		shift @all;
+		$c->delete( +(sort { abs(+($c->coords($a))[0] - $x) <=> abs(+($c->coords($b))[0] - $x) } @all)[0] );
+	}
+);
+
+MainLoop;

@@ -1,0 +1,83 @@
+#!/usr/bin/perl
+
+use Tk;
+use Tk::PNG;
+use Data::Dumper;
+use Time::HiRes qw(time);
+use SDLx::Music;
+
+-s $ARGV[0] or die "The given image file does not exist.";
+-s $ARGV[1] or die "The given music file does not exist.";
+-s $ARGV[2] or die "The given description file does not exist.";
+
+$mw = new MainWindow;
+$mw->title("Runner view: music '$ARGV[1]', image '$ARGV[0]'");
+
+$sc = $mw->Scrolled("Canvas", -cursor => crosshair)->pack(-side => top, -expand => 1, -fill => "both");
+$c = $sc->Subwidget("canvas");
+
+$status = "Loading ... ";
+$statusbar = $mw->Label(-textvariable => \$status)->pack(-side => bottom, -fill => x);
+
+$c->createImage(0, 0, -anchor => "nw", -image => $mw->Photo(-file => $ARGV[0]));
+$c->configure(-scrollregion => [ $c->bbox("all") ]);
+$sc->xviewMoveto(0);
+
+$starttime = undef;
+
+$music = new SDLx::Music;
+$music->data(m => $ARGV[1]);
+$music->data("m")->volume(100);
+$music->load;
+
+open F, $ARGV[2];
+@linepos = (0);
+@times = (0);
+while(<F>) { chomp; my($t, $x) = split /\t/; push @linepos, $x; push @times, $t; }
+($l, $t, $r, $b) = @{$c->cget("scrollregion")};
+@lines = map { $c->createLine($_, $t, $_, $b, -fill => "red", -dash => ".  ") } @linepos;
+$pointer = $c->createLine(0,$t,0,$b, -fill => "blue", -width => 3);
+
+$status = "Ready.";
+
+$mw->bind("<space>", sub
+	{
+		$music->play($music->data("m"));
+		$starttime = time;
+		$status = "Playing.";
+	}
+);
+
+sub min { $_[0] > 0 ? $_[0] : 0 }
+sub wrap { $_[0] > 0 ? ($_[0] < $_[1] ? $_[0] : $_[1])  : 0 }
+$mw->repeat(50, sub
+	{
+		if(defined $starttime)
+		{
+			if($music->playing)
+			{
+				my($diff) = time - $starttime;
+				
+				my($x) = $r;
+
+				do {
+					if($diff < $times[$_])
+					{
+						$x = $linepos[$_] - ($linepos[$_] - $linepos[$_-1]) * ($times[$_] - $diff) / ($times[$_] - $times[$_-1]);
+						last;
+					}
+				} for 0 .. $#times;
+				$c->coords($pointer, $x, $t, $x, $b);
+				my($x0, $x1) = $sc->xview;
+				$sc->xviewMoveto(wrap($x/($r-$l) - ($x1 - $x0)/2, 1-($x1 - $x0)));
+				$status = sprintf "Playing [x = %d]: %s%.3f sec", $x, ($diff >= 60 ? int($diff/60). " min " : ""), $diff-60*int($diff/60);
+			}
+			else
+			{
+				$status = "Done playing. Right-Click to exit.";
+			}
+		}
+	}
+);
+
+MainLoop;

@@ -1,0 +1,60 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016/Debian) (preloaded format=pdflatex 2017.2.27)  21 MAR 2017 14:43
+entering extended mode
+ \write18 enabled.
+ %&-line parsing enabled.
+**sonata-2.ly
+(./sonata-2.ly
+LaTeX2e <2017/01/01> patch level 1
+Babel <3.9r> and hyphenation patterns for 82 language(s) loaded.
+\@input{".aux}
+! I can't write on file `".aux "'.
+<to be read again> 
+                   \immediate 
+l.1 \include "
+              custom.ly"
+(Press Enter to retry, or Control-D to exit; default file extension is `.tex')
+Please type another output file name: 
+! I can't write on file `".aux "'.
+<to be read again> 
+                   \immediate 
+l.1 \include "
+              custom.ly"
+(Press Enter to retry, or Control-D to exit; default file extension is `.tex')
+Please type another output file name: 
+! I can't write on file `".aux "'.
+<to be read again> 
+                   \immediate 
+l.1 \include "
+              custom.ly"
+(Press Enter to retry, or Control-D to exit; default file extension is `.tex')
+Please type another output file name: 
+! I can't write on file `".aux "'.
+<to be read again> 
+                   \immediate 
+l.1 \include "
+              custom.ly"
+(Press Enter to retry, or Control-D to exit; default file extension is `.tex')
+Please type another output file name: X
+\openout2 = `X.tex'.
+
+! Interruption.
+\@include ...\openout \@partaux #1.aux \immediate 
+                                                  \write \@partaux {\relax }...
+l.1 \include "
+              custom.ly"
+? X
+ 
+Here is how much of TeX's memory you used:
+ 8 strings out of 493022
+ 147 string characters out of 6136244
+ 53187 words of memory out of 5000000
+ 3648 multiletter control sequences out of 15000+600000
+ 3640 words of font info for 14 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 9i,0n,4p,36b,14s stack positions out of 5000i,500n,10000p,200000b,80000s
+No pages of output.
+PDF statistics:
+ 0 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+
